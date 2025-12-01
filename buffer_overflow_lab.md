@@ -25,6 +25,201 @@ Save the following code as `vulnerable.c`:
 ```c
 #include <stdio.h>
 #include <string.h>
+
+void secret_function() {
+    printf("\n🔓 SECRET FUNCTION EXECUTED! 🔓\n");
+    printf("This function was NOT supposed to be called!\n");
+    printf("The buffer overflow changed the program's execution flow.\n\n");
+}
+
+void check_password() {
+    char buffer[8];  // Small buffer - only 8 bytes
+    int authenticated = 0;
+    
+    printf("Enter password: ");
+    gets(buffer);  // VULNERABLE FUNCTION - no bounds checking!
+    
+    if (strcmp(buffer, "pass123") == 0) {
+        authenticated = 1;
+    }
+    
+    if (authenticated) {
+        printf("✓ Access granted!\n");
+    } else {
+        printf("✗ Access denied!\n");
+    }
+}
+
+int main() {
+    printf("=== Buffer Overflow Demonstration ===\n");
+    printf("Buffer size: 8 bytes\n\n");
+    
+    check_password();
+    
+    printf("Program ending normally.\n");
+    return 0;
+}
+```
+
+### Step 2: Compile the Program
+
+**Important:** We need to disable certain security features for this demonstration.
+
+```bash
+gcc -fno-stack-protector -o vulnerable vulnerable.c
+```
+
+**Compilation flag explained:**
+- `-fno-stack-protector` - Disables stack canaries (detection mechanism)
+
+**Note:** You will see warnings like:
+```
+warning: implicit declaration of function 'gets'
+warning: the 'gets' function is dangerous and should not be used
+```
+
+This is expected! The compiler is warning us about the vulnerability we're intentionally demonstrating.
+
+---
+
+## Part 1: Basic Experiments
+
+### Experiment 1: Normal Input (No Overflow)
+
+Run the program and enter a short password:
+
+```bash
+./vulnerable
+```
+
+Try entering: `hello`
+
+**Expected result:** Access denied, program exits normally.
+
+**What happened:**
+- Input fits in the 8-byte buffer
+- No overflow occurred
+- `authenticated` remains 0
+- Program behaves correctly
+
+---
+
+### Experiment 2: Overflow the Buffer (Corrupt Adjacent Variable)
+
+Run the program again:
+
+```bash
+./vulnerable
+```
+
+Try entering: `AAAAAAAABBBB` (8 A's followed by 4 B's = 12 characters total)
+
+**Expected result:** Access granted! (Even though password is wrong!)
+
+**What happened:**
+- First 8 characters (AAAAAAAA) filled the buffer
+- Next 4 characters (BBBB) overflowed into the `authenticated` variable
+- `authenticated` got value 0x42424242 (BBBB in hex)
+- Any non-zero value makes the if statement true
+- We bypassed authentication without knowing the password!
+
+---
+
+### Experiment 3: Massive Overflow (Program Crash)
+
+Run the program one more time:
+
+```bash
+./vulnerable
+```
+
+Try entering: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` (32 A's or more)
+
+**Expected result:** Segmentation fault (core dumped)
+
+**What happened:**
+- Buffer severely overflowed
+- Corrupted critical stack data (saved frame pointer and return address)
+- Program tried to return to invalid address (0x41414141 = "AAAA")
+- Operating system killed the program for trying to access invalid memory
+
+---
+
+## Understanding the Memory Layout
+
+When `check_password()` is called, the stack looks like this:
+
+```
+Higher Memory Addresses
+┌────────────────────────┐
+│   Return Address       │ ← Where to go after function returns
+│   (8 bytes)            │
+├────────────────────────┤
+│   Saved Frame Pointer  │ ← Saved %rbp register
+│   (8 bytes)            │
+├────────────────────────┤
+│   authenticated = 0    │ ← Integer variable (adjacent to buffer!)
+│   (4 bytes)            │
+├────────────────────────┤
+│   buffer[8]            │ ← Our input goes here
+│   (8 bytes)            │
+└────────────────────────┘
+Lower Memory Addresses
+```
+
+When we overflow the buffer:
+1. **Small overflow** (12 chars): Overwrites `authenticated` with "BBBB"
+2. **Medium overflow** (20+ chars): Overwrites saved frame pointer
+3. **Large overflow** (32+ chars): Overwrites return address → CRASH!
+
+---
+
+## Extension 1: Using GDB to Examine Memory
+
+### Install GDB (if not already installed)
+
+```bash
+# On Ubuntu/WSL
+sudo apt-get update
+sudo apt-get install gdb
+
+# On Mac
+brew install gdb
+```
+
+### Start GDB
+
+```bash
+gdb ./vulnerable
+```
+
+### Set a Breakpoint
+
+```gdb
+(gdb) break check_password
+(gdb) run
+```
+
+When it stops, examine memory:
+
+```gdb
+(gdb) info locals
+(gdb) print &buffer
+(gdb) print &authenticated
+(gdb) x/32xb &buffer
+```
+
+This shows you the exact memory addresses and how the variables are laid out.
+
+---
+
+## Extension 2: Call secret_function() (Advanced Challenge)
+
+**⚠️ Important:** This extension requires a modified version of the program that uses `read()` instead of `gets()` for more reliable exploitation. If you want to attempt this challenge, save this modified version as `vulnerable_advanced.c`:
+
+```c
+#include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 void secret_function() {
@@ -65,160 +260,10 @@ int main() {
 }
 ```
 
-### Step 2: Compile the Program
-
-**Important:** We need to disable certain security features for this demonstration.
-
+**Compile this advanced version with:**
 ```bash
-gcc -o vulnerable vulnerable.c -fno-stack-protector -z execstack -no-pie -g
+gcc -o vulnerable_advanced vulnerable_advanced.c -fno-stack-protector -z execstack -no-pie -g
 ```
-
-**Compilation flags explained:**
-- `-fno-stack-protector` - Disables stack canaries
-- `-z execstack` - Makes stack executable
-- `-no-pie` - Disables position independent executable (fixed addresses)
-- `-g` - Includes debugging symbols
-
-**Note:** If you get compilation warnings about `gets()`, that's expected - it's warning us about the dangerous function we're intentionally using!
-
----
-
-## Part 1: Basic Experiments
-
-### Experiment 1: Normal Input (No Overflow)
-
-Run the program and enter a short password:
-
-```bash
-./vulnerable
-```
-
-Try entering: `hello`
-
-**Expected result:** Access denied, program exits normally.
-
-**What happened:**
-- Input fits in the 8-byte buffer
-- No overflow occurred
-- `authenticated` remains 0
-- Program behaves correctly
-
----
-
-### Experiment 2: Overflow the Buffer (Corrupt Adjacent Variable)
-
-Run the program again:
-
-```bash
-./vulnerable
-```
-
-Try entering: `AAAAAAAAAAAAAAAA` (16 A's)
-
-**Expected result:** May see strange behavior depending on memory layout.
-
-**What happened:**
-- Buffer overflowed with 16 bytes
-- May have overwritten the `authenticated` variable
-- Program behavior depends on what value ended up in `authenticated`
-
----
-
-### Experiment 3: Massive Overflow (Program Crash)
-
-Run the program one more time:
-
-```bash
-./vulnerable
-```
-
-Try entering: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` (32 A's or more)
-
-**Expected result:** Segmentation fault (core dumped)
-Try 64 A's if the program still runs with 32 A's :)
-
-**What happened:**
-- Buffer severely overflowed
-- Corrupted critical stack data (saved frame pointer and return address)
-- Program tried to return to invalid address (0x41414141 = "AAAA")
-- Operating system killed the program for trying to access invalid memory
-
----
-
-## Understanding the Memory Layout
-
-When `check_password()` is called, the stack looks like this:
-
-```
-Higher Memory Addresses
-┌────────────────────────┐
-│   Return Address       │ ← Where to go after function returns
-│   (8 bytes)            │
-├────────────────────────┤
-│   Saved Frame Pointer  │ ← Saved %rbp register
-│   (8 bytes)            │
-├────────────────────────┤
-│   authenticated = 0    │ ← Integer variable (adjacent to buffer!)
-│   (4 bytes + padding)  │
-├────────────────────────┤
-│   buffer[16]           │ ← Our input goes here
-│   (16 bytes)           │
-└────────────────────────┘
-Lower Memory Addresses
-```
-
-When we overflow the buffer:
-1. **Small overflow** (12 chars): Overwrites `authenticated`
-2. **Medium overflow** (24+ chars): Overwrites saved frame pointer
-3. **Large overflow** (32+ chars): Overwrites return address → CRASH!
-
----
-
-## Extension 1: Using GDB to Examine Memory
-
-### Install GDB (if not already installed)
-
-```bash
-# On Ubuntu/WSL
-sudo apt-get update
-sudo apt-get install gdb
-
-```
-
-### Start GDB
-
-```bash
-gdb ./vulnerable
-```
-
-### Set a Breakpoint
-
-```gdb
-(gdb) break check_password
-(gdb) run
-```
-
-When it stops, examine memory:
-
-```gdb
-(gdb) info locals
-(gdb) print &buffer
-(gdb) print &authenticated
-(gdb) x/32xb &buffer
-```
-
-This shows you the exact memory addresses and how the variables are laid out.
-Quit gdb
-```
-(gdb) quit
-A debugging session is active.
-
-        Inferior 1 [process 14864] will be killed.
-
-Quit anyway? (y or n) y
----
-```
-## Extension 2: Call secret_function() (Advanced Challenge)
 
 **Objective:** Use buffer overflow to call `secret_function()` without it being called in the code.
 
@@ -229,7 +274,7 @@ This is a more advanced exploitation technique that demonstrates **control flow 
 Use the `nm` tool to examine the binary's symbols:
 
 ```bash
-nm vulnerable | grep secret_function
+nm vulnerable_advanced | grep secret_function
 ```
 
 **Example output:**
@@ -244,7 +289,7 @@ Your address might be different - use YOUR actual address!
 x86-64 calling convention requires 16-byte stack alignment. We'll use a simple RET instruction:
 
 ```bash
-objdump -d vulnerable | grep "ret$" | head -1
+objdump -d vulnerable_advanced | grep "ret$" | head -1
 ```
 
 **Example output:**
@@ -289,7 +334,7 @@ sys.stdout.buffer.write(payload)
 ### Step 5: Run the Exploit
 
 ```bash
-python3 exploit.py | ./vulnerable
+python3 exploit.py | ./vulnerable_advanced
 ```
 
 **Expected result:**
@@ -455,10 +500,11 @@ snprintf(buffer, sizeof(buffer), "Hello %s", name);
 - Recompile with `-fno-stack-protector`
 
 ### Exploit doesn't work (Extension 2)
+- Make sure you compiled `vulnerable_advanced.c` (not the original `vulnerable.c`)
 - Make sure you're using YOUR actual addresses (not examples)
 - Check that you have the correct offset (24 bytes)
 - Verify little-endian byte order
-- Use GDB to debug: `gdb -ex "run < <(python3 exploit.py)" ./vulnerable`
+- Use GDB to debug: `gdb -ex "run < <(python3 exploit.py)" ./vulnerable_advanced`
 
 ### Different addresses than examples
 - This is NORMAL! Addresses vary by system
@@ -565,28 +611,39 @@ By understanding how these attacks work, you become a better programmer and secu
 ## Quick Reference Card
 
 ### Compilation
+**Basic Lab:**
 ```bash
-gcc -o vulnerable vulnerable.c -fno-stack-protector -z execstack -no-pie -g
+gcc -fno-stack-protector -o vulnerable vulnerable.c
 ```
 
-### Test Inputs
-| Input Length | Expected Result |
-|-------------|-----------------|
-| 5 chars | Normal operation |
-| 16 chars | May corrupt `authenticated` |
-| 32 chars | Segmentation fault |
+**Advanced (Extension 2):**
+```bash
+gcc -o vulnerable_advanced vulnerable_advanced.c -fno-stack-protector -z execstack -no-pie -g
+```
+
+### Test Inputs (Basic Lab)
+| Input Length | Input | Expected Result |
+|-------------|-------|-----------------|
+| 7 chars | `hello` | Normal - access denied |
+| 12 chars | `AAAAAAAABBBB` | Corrupts authenticated - access granted! |
+| 32 chars | 32 A's | Segmentation fault |
 
 ### Finding Addresses (Extension 2)
 ```bash
-nm vulnerable | grep secret_function
-objdump -d vulnerable | grep "ret$" | head -1
+nm vulnerable_advanced | grep secret_function
+objdump -d vulnerable_advanced | grep "ret$" | head -1
 ```
 
-### Memory Layout
+### Memory Layout (Basic Lab)
+```
+[Buffer 8B][authenticated 4B][Saved RBP 8B][Return Addr 8B]
+           ↑ Overflow here (12 chars = 8 + 4)
+```
+
+### Memory Layout (Extension 2)
 ```
 [Buffer 16B][Saved RBP 8B][Return Addr 8B]
-            ↑              ↑
-        Overflow here   Hijack here
+                          ↑ Hijack here (24 bytes padding)
 ```
 
 ---
