@@ -351,9 +351,9 @@ Buffer Overflow Demonstration
 ==============================
 Enter some text: You entered: AAAAAAAAAAAAAAAAAAAAAAAA␦@
 
-***************************************************
-* 🔓 CONGRATULATIONS! You've called the secret 🔓  *
-*   function through a buffer overflow attack!    *
+**************************************************
+* 🔓 CONGRATULATIONS! You've called the secret 🔓 *
+*   function through a buffer overflow attack!   *
 ***************************************************
 ```
 
