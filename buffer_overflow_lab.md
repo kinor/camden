@@ -135,6 +135,7 @@ Run the program one more time:
 Try entering: `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` (32 A's or more)
 
 **Expected result:** Segmentation fault (core dumped)
+Try 64 A's if the program still runs with 32 A's :)
 
 **What happened:**
 - Buffer severely overflowed
