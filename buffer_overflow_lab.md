@@ -541,13 +541,13 @@ snprintf(buffer, sizeof(buffer), "Hello %s", name);
 - CWE-120: Buffer Copy without Checking Size of Input
 
 ### Videos
-- LiveOverflow: [Binary Exploitation / Memory Corruption](https://www.youtube.com/playlist?list=PLhixgUqwRTjxglIswKp9mpkfPNfHkzyeN).
-- Computerphile: [Buffer Overflow Attack](https://www.youtube.com/watch?v=1S0aBV-Waeo)
+- LiveOverflow: Binary Exploitation / Memory Corruption - https://www.youtube.com/watch?v=iyAyN3GFM7A
+- Computerphile: Buffer Overflow Attack - https://www.youtube.com/watch?v=1S0aBV-Waeo
 
 ### Practice
-- [exploit.education](https://exploit.education/)
-- [picoCTF challenges](https://picoctf.org/)
-- [Hack The Box](https://www.hackthebox.com/)
+- exploit.education - https://exploit.education/
+- picoCTF challenges - https://picoctf.org/
+- Hack The Box - https://www.hackthebox.com/)
 
 ### Tools
 - GDB (GNU Debugger)
