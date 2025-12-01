@@ -242,7 +242,7 @@ Quit anyway? (y or n) y
 void secret_function() {
     printf("\n");
     printf("*************************************************\n");
-    printf("*   CONGRATULATIONS! You've called the secret   *\n");
+    printf("* 🔓 CONGRATULATIONS! You've called the secret 🔓 *\n");
     printf("*   function through a buffer overflow attack!  *\n");
     printf("*************************************************\n");
     printf("\n");
@@ -347,6 +347,14 @@ python3 exploit.py | ./vulnerable_advanced
 
 **Expected result:**
 ```
+Buffer Overflow Demonstration
+==============================
+Enter some text: You entered: AAAAAAAAAAAAAAAAAAAAAAAA␦@
+
+*************************************************
+*   CONGRATULATIONS! You've called the secret   *
+*   function through a buffer overflow attack!  *
+*************************************************
 === Buffer Overflow Demonstration ===
 Buffer size: 16 bytes
 
