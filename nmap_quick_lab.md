@@ -20,15 +20,6 @@ Learn to use Nmap to discover open ports and services on a network.
 sudo apt-get update
 sudo apt-get install nmap -y
 ```
-
-**macOS:**
-```bash
-brew install nmap
-```
-
-**Windows:**
-Download from https://nmap.org/download.html
-
 ---
 
 ## Exercise 1: Scan Yourself (1 minute)
