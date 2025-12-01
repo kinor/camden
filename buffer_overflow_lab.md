@@ -1,5 +1,16 @@
 # Buffer Overflow Lab Activity
-## Operating Systems Concepts - Rutgers Camden
+## Operating Systems Concepts - York College
+
+## Learning Objectives
+
+By completing this lab, you will:
+
+✅ Understand how buffer overflows corrupt memory  
+✅ Recognize dangerous C functions  
+✅ Visualize stack memory layout  
+✅ Experience control flow hijacking firsthand  
+✅ Appreciate modern security defenses  
+✅ Learn safe coding practices  
 
 ---
 
@@ -502,19 +513,6 @@ snprintf(buffer, sizeof(buffer), "Hello %s", name);
 
 ---
 
-
-## Learning Objectives
-
-By completing this lab, you will:
-
-✅ Understand how buffer overflows corrupt memory  
-✅ Recognize dangerous C functions  
-✅ Visualize stack memory layout  
-✅ Experience control flow hijacking firsthand  
-✅ Appreciate modern security defenses  
-✅ Learn safe coding practices  
-
----
 
 ## Ethical Considerations
 
