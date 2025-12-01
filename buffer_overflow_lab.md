@@ -66,11 +66,12 @@ int main() {
 **Important:** We need to disable certain security features for this demonstration.
 
 ```bash
-gcc -fno-stack-protector -o vulnerable vulnerable.c
+gcc -fno-stack-protector -g -o vulnerable vulnerable.c
 ```
 
-**Compilation flag explained:**
+**Compilation flags explained:**
 - `-fno-stack-protector` - Disables stack canaries (detection mechanism)
+- `-g` - Includes debugging symbols (needed for GDB)
 
 **Note:** You will see warnings like:
 ```
@@ -175,6 +176,14 @@ When we overflow the buffer:
 ---
 
 ## Extension 1: Using GDB to Examine Memory
+
+### Prerequisites
+
+Make sure you compiled with the `-g` flag (as shown in Step 2). If you didn't, recompile now:
+
+```bash
+gcc -fno-stack-protector -g -o vulnerable vulnerable.c
+```
 
 ### Install GDB (if not already installed)
 
@@ -490,6 +499,11 @@ snprintf(buffer, sizeof(buffer), "Hello %s", name);
 
 ## Troubleshooting
 
+### "No debugging symbols found in ./vulnerable"
+- You forgot the `-g` flag when compiling
+- Recompile with: `gcc -fno-stack-protector -g -o vulnerable vulnerable.c`
+- The `-g` flag adds debugging information for GDB
+
 ### "Segmentation fault" immediately
 - Check your compilation flags
 - Make sure you used `-fno-stack-protector`
@@ -613,7 +627,7 @@ By understanding how these attacks work, you become a better programmer and secu
 ### Compilation
 **Basic Lab:**
 ```bash
-gcc -fno-stack-protector -o vulnerable vulnerable.c
+gcc -fno-stack-protector -g -o vulnerable vulnerable.c
 ```
 
 **Advanced (Extension 2):**
