@@ -209,9 +209,15 @@ When it stops, examine memory:
 
 This shows you the exact memory addresses and how the variables are laid out.
 Quit gdb
+```
+(gdb) quit
+A debugging session is active.
 
+        Inferior 1 [process 14864] will be killed.
+
+Quit anyway? (y or n) y
 ---
-
+```
 ## Extension 2: Call secret_function() (Advanced Challenge)
 
 **Objective:** Use buffer overflow to call `secret_function()` without it being called in the code.
