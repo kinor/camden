@@ -192,8 +192,6 @@ gcc -fno-stack-protector -g -o vulnerable vulnerable.c
 sudo apt-get update
 sudo apt-get install gdb
 
-# On Mac
-brew install gdb
 ```
 
 ### Start GDB
@@ -219,8 +217,17 @@ When it stops, examine memory:
 ```
 
 This shows you the exact memory addresses and how the variables are laid out.
+Quit gdb
 
+```
+(gdb) quit
+A debugging session is active.
+
+        Inferior 1 [process 15051] will be killed.
+
+Quit anyway? (y or n) y
 ---
+```
 
 ## Extension 2: Call secret_function() (Advanced Challenge)
 
