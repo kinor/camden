@@ -346,8 +346,6 @@ python3 exploit.py | ./vulnerable_advanced
 ```
 
 **Expected result:**
-<img width="591" height="167" alt="image" src="https://github.com/user-attachments/assets/87daf608-b5a1-4b1b-978d-ed4b2b8b8f13" />
-
 ```
 Buffer Overflow Demonstration
 ==============================
@@ -474,30 +472,6 @@ snprintf(buffer, sizeof(buffer), "Hello %s", name);
 
 ---
 
-## Assessment Rubric
-
-### Basic Level (70 points)
-- [ ] Successfully compiled the program (10 pts)
-- [ ] Demonstrated normal execution (10 pts)
-- [ ] Caused variable corruption (20 pts)
-- [ ] Caused segmentation fault (20 pts)
-- [ ] Answered discussion questions (10 pts)
-
-### Advanced Level (30 points - Extension 2)
-- [ ] Found secret_function address (5 pts)
-- [ ] Found RET gadget address (5 pts)
-- [ ] Calculated correct offset (5 pts)
-- [ ] Created working exploit script (10 pts)
-- [ ] Successfully called secret_function() (5 pts)
-
-### Extra Credit (10 points)
-- [ ] Used GDB to examine memory corruption (5 pts)
-- [ ] Explained exploit mechanism in own words (5 pts)
-
-**Total possible: 110 points (100 base + 10 extra credit)**
-
----
-
 ## Troubleshooting
 
 ### "No debugging symbols found in ./vulnerable"
@@ -528,29 +502,6 @@ snprintf(buffer, sizeof(buffer), "Hello %s", name);
 
 ---
 
-## Submission Requirements
-
-Submit a PDF document containing:
-
-1. **Screenshots** showing:
-   - Normal execution (no overflow)
-   - Variable corruption (medium overflow)
-   - Segmentation fault (large overflow)
-   - (Advanced) Calling secret_function()
-
-2. **Written responses** to all discussion questions
-
-3. **(Advanced) Python exploit script** with:
-   - Your actual addresses (not examples)
-   - Comments explaining each line
-   - Screenshot showing successful execution
-
-4. **(Extra Credit) GDB session** showing:
-   - Memory addresses of variables
-   - Hex dump of buffer before/after overflow
-   - Explanation of what you observed
-
----
 
 ## Learning Objectives
 
